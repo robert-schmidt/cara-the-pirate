@@ -29,7 +29,7 @@ portrait() { ffmpeg -v error -y -i "media/$1" -vf "crop=$2,scale=520:520" "src/a
 portrait "cara-happy-2 Large.jpeg"       520:520:70:260  cara
 portrait "zuba Large.jpeg"               520:520:70:210  zuba
 portrait "cookie Large.jpeg"             560:560:320:220 cookie
-portrait "oreo Large.jpeg"               380:380:210:660 oreo
+portrait "oreo-portrait Large.jpeg"      560:560:220:220 oreo
 portrait "cats Large.jpeg"               500:500:60:440  cats
 
 # Homepage TikTok preview, made from the finished vertical cut (node tiktok/make.mjs first).
