@@ -91,6 +91,14 @@ async function allPosts() {
   return posts.sort((a, b) => b.date.localeCompare(a.date));
 }
 
+const WORDS = {
+  en: { all: 'All posts', share: 'Share this', copy: 'Copy link', copied: 'Link copied', read: 'Read the post', none: 'No posts yet.', blog: 'Blog' },
+  ro: { all: 'Toate poveștile', share: 'Dă mai departe', copy: 'Copiază linkul', copied: 'Link copiat', read: 'Citește', none: 'Încă nimic scris.', blog: 'Blog' },
+};
+
+// The picture used on the list and when a post is shared: the cover, or the first photo in the story.
+const preview = (p) => p.cover || (p.body.match(/!\[[^\]]*\]\(([^)\s]+)\)/)?.[1] ?? '');
+
 const excerpt = (body, n = 180) => {
   const t = body.replace(/!\[[^\]]*\]\([^)]*\)/g, '').replace(/[#*>\-]/g, '').replace(/\s+/g, ' ').trim();
   return t.length > n ? `${t.slice(0, n).trimEnd()}…` : t;
@@ -190,6 +198,20 @@ createServer(async (req, res) => {
         'set-cookie': `blog_session=${newSession()}; Path=/blog; HttpOnly; Secure; SameSite=Lax; Max-Age=${30 * 24 * 3600}`,
       });
     }
+    /* --- what the homepage shows --- */
+    if (path === '/blog/api/recent') {
+      const posts = (await allPosts()).filter((p) => !p.draft).slice(0, 3).map((p) => ({
+        slug: p.slug,
+        title: p.title,
+        lang: p.lang,
+        date: p.date,
+        dateText: fmtDate(p.date, p.lang),
+        image: preview(p),
+        excerpt: excerpt(p.body, 120),
+      }));
+      return json(res, 200, posts, { 'cache-control': 'public, max-age=120', 'access-control-allow-origin': '*' });
+    }
+
     if (path.startsWith('/blog/api/')) {
       if (!authed) return json(res, 401, { error: 'Not logged in' });
 
@@ -267,15 +289,21 @@ createServer(async (req, res) => {
       const posts = (await allPosts()).filter((p) => !p.draft || authed);
       const list = posts.length
         ? posts
-            .map(
-              (p) => `<li class="post-card${p.draft ? ' is-draft' : ''}">` +
-                (p.cover ? `<a class="thumb" href="/blog/${p.slug}"><img src="${esc(p.cover)}" alt="" loading="lazy"></a>` : '') +
-                `<div><p class="date">${fmtDate(p.date, p.lang)}${p.draft ? ' · draft' : ''}</p>` +
+            .map((p) => {
+              const img = preview(p);
+              return (
+                `<li class="post-card${img ? ' has-cover' : ''}${p.draft ? ' is-draft' : ''}">` +
+                (img ? `<span class="thumb"><img src="${esc(img)}" alt="" loading="lazy"></span>` : '') +
+                `<div class="post-card-text">` +
+                `<p class="date">${fmtDate(p.date, p.lang)}${p.draft ? ' · draft' : ''}</p>` +
                 `<h2><a href="/blog/${p.slug}">${esc(p.title)}</a></h2>` +
-                `<p>${esc(excerpt(p.body))}</p></div></li>`,
-            )
+                `<p class="excerpt">${esc(excerpt(p.body))}</p>` +
+                `<p class="more">${WORDS[p.lang].read}</p>` +
+                `</div></li>`
+              );
+            })
             .join('')
-        : '<li class="post-card"><div><p>No posts yet.</p></div></li>';
+        : `<li class="post-card"><div class="post-card-text"><p>${WORDS.en.none}</p></div></li>`;
       return send(
         res,
         200,
@@ -295,12 +323,36 @@ createServer(async (req, res) => {
       if (text) {
         const p = parsePost(text, slug);
         if (p.draft && !authed) return send(res, 404, await page({ title: 'Not found', description: '', content: '<section class="blog-wrap"><div class="wrap"><h1>Not found</h1></div></section>' }));
+        const w = WORDS[p.lang];
+        const url = `${SITE}/blog/${slug}`;
+        const shareText = encodeURIComponent(p.title);
+        const shareUrl = encodeURIComponent(url);
+        const share =
+          `<div class="share-row" data-share-url="${esc(url)}" data-share-title="${esc(p.title)}" data-copied="${w.copied}">` +
+          `<span class="share-label">${w.share}</span>` +
+          `<a class="share-btn" href="https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}" target="_blank" rel="noopener">WhatsApp</a>` +
+          `<a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=${shareUrl}" target="_blank" rel="noopener">Facebook</a>` +
+          `<a class="share-btn" href="https://x.com/intent/tweet?url=${shareUrl}&text=${shareText}" target="_blank" rel="noopener">X</a>` +
+          `<button class="share-btn" type="button" data-copy-link>${w.copy}</button>` +
+          `</div>`;
         const content =
           `<section class="blog-wrap" data-mood="dawn"><div class="wrap"><article class="post">` +
           `<p class="date">${fmtDate(p.date, p.lang)}</p><h1>${esc(p.title)}</h1>` +
           (p.cover ? `<img class="cover" src="${esc(p.cover)}" alt="">` : '') +
-          `${markdown(p.body)}<p class="back"><a href="/blog">← ${p.lang === 'ro' ? 'Toate poveștile' : 'All posts'}</a></p>` +
-          `</article></div></section>`;
+          `${markdown(p.body)}${share}<p class="back"><a href="/blog">← ${w.all}</a></p>` +
+          `</article></div></section>` +
+          `<script>(function(){
+  var row=document.querySelector('.share-row'); if(!row) return;
+  var url=row.dataset.shareUrl, title=row.dataset.shareTitle;
+  var track=function(how){ if(window.gtag) gtag('event','share',{method:how,content_type:'blog_post',item_id:url}); };
+  row.querySelectorAll('a.share-btn').forEach(function(a){ a.addEventListener('click',function(){ track(a.textContent.trim()); }); });
+  var copy=row.querySelector('[data-copy-link]');
+  copy.addEventListener('click',async function(){
+    if(navigator.share){ try{ await navigator.share({title:title,url:url}); track('native'); return; }catch(e){ if(e && e.name==='AbortError') return; } }
+    try{ await navigator.clipboard.writeText(url); var t=copy.textContent; copy.textContent=row.dataset.copied; track('copy');
+      setTimeout(function(){ copy.textContent=t; },1800); }catch(e){}
+  });
+})();</script>`;
         return send(
           res,
           200,

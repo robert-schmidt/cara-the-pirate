@@ -199,6 +199,40 @@ gtag('config', '${gaId}');`;
       </section>
 
       <Donate lang={lang} />
+
+      <section class="keepup" data-mood="dawn" aria-labelledby="keepup-h">
+        <div class="wrap">
+          <div>
+            <h2 id="keepup-h">{s.keepup.title}</h2>
+            <p class="lede">{s.keepup.tiktokLede}</p>
+            <div class="tok-video">
+              <video
+                data-autoplay
+                muted
+                loop
+                playsinline
+                preload="none"
+                poster="/video/tiktok-preview.jpg"
+                width="540"
+                height="960"
+                aria-label={s.keepup.watch}
+              >
+                <source src="/video/tiktok-preview.mp4" type="video/mp4" />
+              </video>
+            </div>
+            <p class="tok-links">
+              <a class="btn alt" href={social.tiktok}>{s.keepup.follow}</a>
+            </p>
+          </div>
+
+          {/* filled in by story.ts from /blog/api/recent; stays hidden if there is nothing to show */}
+          <div class="latest" data-latest data-lang={lang} hidden>
+            <h2>{s.keepup.blogTitle}</h2>
+            <ul class="latest-list"></ul>
+            <p class="all-posts"><a href="/blog">{s.keepup.allPosts}</a></p>
+          </div>
+        </div>
+      </section>
     </main>
 
     <SiteFooter lang={lang} />

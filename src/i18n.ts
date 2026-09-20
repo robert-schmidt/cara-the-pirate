@@ -93,6 +93,14 @@ const en = {
     },
     follow: ['Follow Cara on', 'and'],
   },
+  keepup: {
+    title: 'Keep up with Cara',
+    tiktokLede: 'Short clips of the pack, most days.',
+    follow: 'Follow on TikTok',
+    watch: 'Watch her story',
+    blogTitle: 'Latest from the blog',
+    allPosts: 'Read the blog',
+  },
   footer: 'Made with love, and a few chewed cables, just outside Bucharest.',
 };
 
@@ -188,6 +196,14 @@ const ro: typeof en = {
       done: 'Link copiat',
     },
     follow: ['Urmărește-o pe Cara pe', 'și'],
+  },
+  keepup: {
+    title: 'Ține pasul cu Cara',
+    tiktokLede: 'Clipuri scurte cu gașca, aproape zilnic.',
+    follow: 'Urmărește pe TikTok',
+    watch: 'Vezi povestea ei',
+    blogTitle: 'Ultimele povești de pe blog',
+    allPosts: 'Citește blogul',
   },
   footer: 'Făcut cu drag, și câteva cabluri roase, lângă București.',
 };
