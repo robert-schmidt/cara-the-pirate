@@ -17,7 +17,8 @@ const s = t[lang];
 const home = lang === 'en' ? '/' : '/ro/';
 const otherHome = lang === 'en' ? '/ro/' : '/';
 const url = new URL(home, Astro.site);
-const title = 'Cara the Pirate';
+const title = s.meta.title;
+const brand = 'Cara the Pirate';
 
 const chapters = (await getCollection('chapters', (c) => c.id.startsWith(`${lang}/`))).sort((a, b) =>
   a.id.localeCompare(b.id),
@@ -32,9 +33,30 @@ const jsonLd = {
       '@type': 'WebSite',
       '@id': 'https://carathepirate.com/#website',
       url: 'https://carathepirate.com/',
-      name: 'Cara the Pirate',
+      name: brand,
       inLanguage: lang,
       description: s.meta.description,
+    },
+    {
+      // ties the site to the social accounts, so Google treats them as one thing
+      '@type': 'Organization',
+      '@id': 'https://carathepirate.com/#org',
+      name: brand,
+      url: 'https://carathepirate.com/',
+      logo: 'https://carathepirate.com/og.jpg',
+      description: s.meta.description,
+      sameAs: [social.x, social.tiktok, social.instagram],
+    },
+    {
+      // the homepage video, so it can appear as a video result
+      '@type': 'VideoObject',
+      name: 'Cara the Pirate — her story in 41 seconds',
+      description: s.meta.description,
+      thumbnailUrl: 'https://carathepirate.com/video/tiktok-preview.jpg',
+      contentUrl: 'https://carathepirate.com/video/tiktok-preview.mp4',
+      uploadDate: '2026-09-19',
+      duration: 'PT41S',
+      inLanguage: lang,
     },
     {
       '@type': 'Article',
@@ -47,6 +69,7 @@ const jsonLd = {
       isPartOf: { '@id': 'https://carathepirate.com/#website' },
       mainEntityOfPage: url.href,
       author: { '@type': 'Person', name: 'Robert and Adelina' },
+      publisher: { '@id': 'https://carathepirate.com/#org' },
       about: { '@type': 'Thing', name: 'Cara, a one-eyed rescue dog near Bucharest' },
     },
   ],
@@ -76,6 +99,7 @@ gtag('config', '${gaId}');`;
     <meta name="theme-color" content="#edf2f1" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={title} />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta property="og:description" content={s.meta.description} />
     <meta property="og:url" content={url} />
     <meta property="og:image" content={new URL('/og.jpg', Astro.site)} />

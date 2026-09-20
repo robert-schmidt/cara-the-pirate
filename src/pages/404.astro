@@ -1,0 +1,37 @@
+---
+import '@fontsource-variable/literata/opsz.css';
+import '@fontsource-variable/literata/opsz-italic.css';
+import '@fontsource-variable/shantell-sans/full.css';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nothing here — Cara the Pirate</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#edf2f1" />
+  </head>
+  <body>
+    <SiteHeader lang="en" />
+    <main>
+      <section class="blog-wrap" data-mood="dawn">
+        <div class="wrap">
+          <h1>Nothing here</h1>
+          <p class="lede">Cara probably chewed it.</p>
+          <p class="notfound-links">
+            <a class="btn" href="/">Read her story</a>
+            <a class="btn alt" href="/blog">Latest from the blog</a>
+            <a class="btn alt" href="/#donate">Help out</a>
+          </p>
+        </div>
+      </section>
+    </main>
+    <SiteFooter lang="en" />
+  </body>
+</html>

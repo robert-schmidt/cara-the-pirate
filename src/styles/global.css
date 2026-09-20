@@ -479,6 +479,15 @@ html.js .x-mark:not(.found) path { stroke-dashoffset: 1; }
 .post .back { margin-top: 2.5rem; font-family: var(--hand); }
 
 .share-row.centered { justify-content: center; border-top: 0; margin-top: 1.2rem; padding-top: 0; }
+.post-donate {
+  margin: 3rem 0 0;
+  padding: 1.5rem;
+  border: 1px solid color-mix(in srgb, var(--mark) 35%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mark) 5%, transparent);
+}
+.post-donate p { margin: 0 0 1.1rem; }
+
 .share-row {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
   margin-top: 3rem; padding-top: 1.5rem;
@@ -530,3 +539,5 @@ html.js .x-mark:not(.found) path { stroke-dashoffset: 1; }
 @media (max-width: 599px) {
   .bar .social { display: none; } /* the footer still links them; the header needs the room */
 }
+
+.notfound-links { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2rem; }
