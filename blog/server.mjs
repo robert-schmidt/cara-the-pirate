@@ -15,6 +15,22 @@ const ADMIN = new URL('./admin.html', import.meta.url);
 const SITE = 'https://carathepirate.com';
 const PORT = Number(process.env.PORT ?? 3060);
 const MAX_UPLOAD = 6 * 1024 * 1024;
+const INDEXNOW_KEY = process.env.INDEXNOW_KEY ?? '';
+
+// Tell search engines the moment something is published or changed. Free, no account needed.
+function pingSearchEngines(urls) {
+  if (!INDEXNOW_KEY || urls.length === 0) return;
+  fetch('https://api.indexnow.org/indexnow', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      host: 'carathepirate.com',
+      key: INDEXNOW_KEY,
+      keyLocation: `${SITE}/${INDEXNOW_KEY}.txt`,
+      urlList: urls,
+    }),
+  }).catch(() => {});
+}
 
 await mkdir(POSTS, { recursive: true });
 await mkdir(UPLOADS, { recursive: true });
@@ -114,7 +130,7 @@ async function shell() {
   return shellCache.text;
 }
 
-async function page({ title, description, content, lang = 'en', image = '', url = `${SITE}/blog` }) {
+async function page({ title, description, content, lang = 'en', image = '', url = `${SITE}/blog`, jsonLd = null }) {
   const meta = [
     `<meta name="description" content="${esc(description)}">`,
     `<link rel="canonical" href="${esc(url)}">`,
@@ -124,6 +140,7 @@ async function page({ title, description, content, lang = 'en', image = '', url 
     `<meta property="og:url" content="${esc(url)}">`,
     `<meta property="og:image" content="${esc(image || `${SITE}/og.jpg`)}">`,
     `<meta name="twitter:card" content="summary_large_image">`,
+    jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>` : '',
   ].join('');
   return (await shell())
     .replace('<!--TITLE-->', esc(title))
@@ -230,6 +247,7 @@ createServer(async (req, res) => {
           body: String(p.body || ''),
         };
         await writeFile(join(POSTS, `${slug}.md`), serialise(post));
+        if (!post.draft) pingSearchEngines([`${SITE}/blog/${slug}`, `${SITE}/blog`, `${SITE}/`]);
         return json(res, 200, post);
       }
 
@@ -237,6 +255,7 @@ createServer(async (req, res) => {
         const slug = safeSlug(basename(path.slice(16)));
         if (!slug) return json(res, 400, { error: 'Bad slug' });
         await unlink(join(POSTS, `${slug}.md`)).catch(() => {});
+        pingSearchEngines([`${SITE}/blog`]);
         return json(res, 200, { ok: true });
       }
 
@@ -282,6 +301,20 @@ createServer(async (req, res) => {
           `<link>${SITE}/blog</link><description>News from the pack near Bucharest.</description>${items}</channel></rss>`,
         { 'content-type': 'application/rss+xml; charset=utf-8' },
       );
+    }
+
+    /* --- sitemap, so search engines find every post --- */
+    if (path === '/blog/sitemap.xml') {
+      const posts = (await allPosts()).filter((p) => !p.draft);
+      const urls = [
+        `<url><loc>${SITE}/blog</loc><changefreq>weekly</changefreq></url>`,
+        ...posts.map(
+          (p) => `<url><loc>${SITE}/blog/${p.slug}</loc><lastmod>${new Date(p.date).toISOString().slice(0, 10)}</lastmod></url>`,
+        ),
+      ].join('');
+      return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls}</urlset>`, {
+        'content-type': 'application/xml; charset=utf-8',
+      });
     }
 
     /* --- index --- */
@@ -353,6 +386,7 @@ createServer(async (req, res) => {
       setTimeout(function(){ copy.textContent=t; },1800); }catch(e){}
   });
 })();</script>`;
+        const img = preview(p);
         return send(
           res,
           200,
@@ -361,8 +395,21 @@ createServer(async (req, res) => {
             description: excerpt(p.body, 160),
             content,
             lang: p.lang,
-            image: p.cover ? SITE + p.cover : '',
-            url: `${SITE}/blog/${slug}`,
+            image: img ? SITE + img : '',
+            url,
+            jsonLd: {
+              '@context': 'https://schema.org',
+              '@type': 'BlogPosting',
+              headline: p.title,
+              description: excerpt(p.body, 160),
+              image: img ? SITE + img : `${SITE}/og.jpg`,
+              datePublished: p.date,
+              dateModified: p.date,
+              inLanguage: p.lang,
+              mainEntityOfPage: url,
+              author: { '@type': 'Person', name: 'Robert and Adelina' },
+              publisher: { '@type': 'Organization', name: 'Cara the Pirate', url: SITE },
+            },
           }),
           { 'cache-control': 'no-cache' },
         );

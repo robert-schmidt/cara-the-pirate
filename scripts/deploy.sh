@@ -27,6 +27,11 @@ ssh -p "$PORT" "$HOST" "sudo chown -R $OWNER:$OWNER $DEST $BLOG_DEST \
   && sudo find $DEST -type f -exec chmod 644 {} + \
   && sudo systemctl restart $BLOG_SERVICE"
 
+echo "→ telling search engines"
+curl -sS -X POST https://api.indexnow.org/indexnow -H 'content-type: application/json' \
+  -d "{\"host\":\"carathepirate.com\",\"key\":\"ee1130088d8db31c6080d51ca9ede73c\",\"keyLocation\":\"$SITE_URL/ee1130088d8db31c6080d51ca9ede73c.txt\",\"urlList\":[\"$SITE_URL/\",\"$SITE_URL/ro/\",\"$SITE_URL/blog\"]}" \
+  -o /dev/null -w "  IndexNow: %{http_code}\n" || true
+
 echo "→ live check"
 curl -sS -o /dev/null -w "  $SITE_URL  %{http_code}  (%{time_total}s)\n" "$SITE_URL/"
 curl -sS -o /dev/null -w "  $SITE_URL/blog  %{http_code}\n" "$SITE_URL/blog"
