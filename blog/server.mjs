@@ -108,8 +108,18 @@ async function allPosts() {
 }
 
 const WORDS = {
-  en: { all: 'All posts', share: 'Share this', copy: 'Copy link', copied: 'Link copied', read: 'Read the post', none: 'No posts yet.', blog: 'Blog' },
-  ro: { all: 'Toate poveștile', share: 'Dă mai departe', copy: 'Copiază linkul', copied: 'Link copiat', read: 'Citește', none: 'Încă nimic scris.', blog: 'Blog' },
+  en: {
+    all: 'All posts', share: 'Share this', copy: 'Copy link', copied: 'Link copied', read: 'Read the post',
+    none: 'No posts yet.', blog: 'Blog', home: 'Her story',
+    donateLede: "Cara's food, her vet visits and the fifteen dogs at our little shelter all run on donations.",
+    donateBtn: 'Help keep the bowls full',
+  },
+  ro: {
+    all: 'Toate poveștile', share: 'Dă mai departe', copy: 'Copiază linkul', copied: 'Link copiat', read: 'Citește',
+    none: 'Încă nimic scris.', blog: 'Blog', home: 'Povestea ei',
+    donateLede: 'Mâncarea Carei, vizitele la veterinar și cei cincisprezece câini din adăpost depind de donații.',
+    donateBtn: 'Ajută-ne să ținem bolurile pline',
+  },
 };
 
 // The picture used on the list and when a post is shared: the cover, or the first photo in the story.
@@ -341,9 +351,24 @@ createServer(async (req, res) => {
         res,
         200,
         await page({
-          title: 'Blog · Cara the Pirate',
-          description: 'News from Cara and the rest of the pack near Bucharest.',
+          title: 'Blog — news from the pack · Cara the Pirate',
+          description: 'News from Cara and the rest of the pack near Bucharest: the dogs, the cats, the shelter in Tulcea.',
           content: `<section class="blog-wrap" data-mood="dawn"><div class="wrap"><h1>Blog</h1><ul class="post-list">${list}</ul></div></section>`,
+          jsonLd: {
+            '@context': 'https://schema.org',
+            '@type': 'Blog',
+            name: 'Cara the Pirate',
+            url: `${SITE}/blog`,
+            description: 'News from Cara and the rest of the pack near Bucharest.',
+            publisher: { '@type': 'Organization', name: 'Cara the Pirate', url: SITE },
+            blogPost: posts.filter((p) => !p.draft).map((p) => ({
+              '@type': 'BlogPosting',
+              headline: p.title,
+              url: `${SITE}/blog/${p.slug}`,
+              datePublished: p.date,
+              image: preview(p) ? SITE + preview(p) : `${SITE}/og.jpg`,
+            })),
+          },
         }),
         { 'cache-control': 'no-cache' },
       );
@@ -372,7 +397,10 @@ createServer(async (req, res) => {
           `<section class="blog-wrap" data-mood="dawn"><div class="wrap"><article class="post">` +
           `<p class="date">${fmtDate(p.date, p.lang)}</p><h1>${esc(p.title)}</h1>` +
           (p.cover ? `<img class="cover" src="${esc(p.cover)}" alt="">` : '') +
-          `${markdown(p.body)}${share}<p class="back"><a href="/blog">← ${w.all}</a></p>` +
+          `${markdown(p.body)}` +
+          `<aside class="post-donate"><p>${w.donateLede}</p>` +
+          `<a class="btn" href="/#donate">${w.donateBtn}</a></aside>` +
+          `${share}<p class="back"><a href="/blog">← ${w.all}</a></p>` +
           `</article></div></section>` +
           `<script>(function(){
   var row=document.querySelector('.share-row'); if(!row) return;
@@ -409,6 +437,14 @@ createServer(async (req, res) => {
               mainEntityOfPage: url,
               author: { '@type': 'Person', name: 'Robert and Adelina' },
               publisher: { '@type': 'Organization', name: 'Cara the Pirate', url: SITE },
+              breadcrumb: {
+                '@type': 'BreadcrumbList',
+                itemListElement: [
+                  { '@type': 'ListItem', position: 1, name: w.home, item: `${SITE}/` },
+                  { '@type': 'ListItem', position: 2, name: w.blog, item: `${SITE}/blog` },
+                  { '@type': 'ListItem', position: 3, name: p.title },
+                ],
+              },
             },
           }),
           { 'cache-control': 'no-cache' },

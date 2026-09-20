@@ -2,6 +2,8 @@
 
 const en = {
   meta: {
+    // 60 characters or so: Google truncates past that, and the words people search for come first
+    title: 'Cara the Pirate — a one-eyed rescue dog near Bucharest',
     description:
       'Cara lost an eye on the streets and found a home just outside Bucharest. Follow her story, meet her crew, and help keep the bowls full.',
     locale: 'en_US',
@@ -108,6 +110,7 @@ const en = {
 
 const ro: typeof en = {
   meta: {
+    title: 'Cara the Pirate — o cățelușă salvată lângă București',
     description:
       'Cara și-a pierdut un ochi pe stradă și și-a găsit o casă lângă București. Urmărește-i povestea, cunoaște-i echipajul și ajută-ne să ținem bolurile pline.',
     locale: 'ro_RO',
