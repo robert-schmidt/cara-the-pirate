@@ -265,6 +265,7 @@ document.addEventListener(
     else if (el.matches('[data-share]')) track('share', { method: 'native' });
     else if (href.includes('x.com/carathepirate')) track('social_click', { method: 'x' });
     else if (href.includes('tiktok.com/@cara')) track('social_click', { method: 'tiktok' });
+    else if (href.includes('instagram.com/cara')) track('social_click', { method: 'instagram' });
     else if (href.startsWith('/blog')) track('blog_click', { method: 'site' });
   },
   { capture: true },

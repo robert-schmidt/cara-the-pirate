@@ -83,6 +83,71 @@ and losing the accounts would cost you the audience this whole project depends o
 6. **Ask Center of Hope to share it.** A vet clinic's audience is exactly the right audience, and
    you're already their client.
 
+## Instagram
+
+**The videos work on Reels as they are.** They're 1080×1920, and — this matters — they carry **no
+TikTok watermark**, because they're exported straight from the footage rather than downloaded back
+out of TikTok. Instagram actively demotes watermarked reposts, so a lot of accounts lose reach here
+without knowing it.
+
+The text also sits inside Instagram's safe area: the top block starts 250px down (clear of the
+Reels header) and the low block sits 480px above the bottom edge, well clear of the caption,
+profile name and audio strip that Instagram lays over the bottom ~300px.
+
+- Post the **`-silent.mp4`** versions and pick audio inside Instagram — their algorithm favours
+  tracks from their own library, same as TikTok.
+- The 14–16s shorts fit Reels best; the 41s cut works as a pinned Reel or a feed post.
+- Covers are already rendered: `NAME-cover.jpg`.
+- Post the same thing on TikTok and Reels, but **upload natively to each** rather than cross-posting
+  automatically — cross-posted Reels get less reach.
+
+### Profile text
+
+**Name field** (this one is searchable, so it carries "rescue dog"):
+
+```
+Cara the Pirate · rescue dog
+```
+
+**Bio** — pick one:
+
+```
+One eye. Whole heart. Zero respect for pillows. 🏴‍☠️
+Rescued near Bucharest, June 2026.
+Her story + how to help 👇
+```
+
+```
+Cara 🏴‍☠️ one eye, all heart.
+A family near Bucharest: 4 dogs, 5 cats, and 15 more at our little shelter.
+How to help 👇
+```
+
+```
+"I choose to keep the eye that sees the good in people." 🏴‍☠️
+Rescue dog, near Bucharest.
+The whole story 👇
+```
+
+Romanian, if the audience leans local:
+
+```
+Un ochi. O inimă întreagă. Zero respect pentru perne. 🏴‍☠️
+Salvată lângă București, iunie 2026.
+Povestea ei + cum poți ajuta 👇
+```
+
+**Link in bio:** `https://cara.dog/?utm_source=instagram&utm_medium=bio`
+
+### A feed on the website?
+
+Not worth it right now, for three reasons: Meta retired the simple Basic Display API, so a live feed
+needs a Business account, a linked Facebook page, a Meta app and a token that expires every 60 days;
+the official embed loads Meta's tracking, which would force a cookie banner onto a site that
+currently needs none; and it would mostly show the same videos the homepage already plays. If you
+convert the account to Business and want it anyway, say so — the token refresh can run on a cron and
+I'll build it.
+
 ## Links that measure themselves
 
 Use these instead of the bare domain, and Analytics will tell you which channel actually brings
@@ -92,6 +157,7 @@ donors:
 TikTok bio    https://cara.dog/?utm_source=tiktok&utm_medium=bio
 X bio         https://cara.dog/?utm_source=x&utm_medium=bio
 X posts       https://cara.dog/?utm_source=x&utm_medium=post
+Instagram     https://cara.dog/?utm_source=instagram&utm_medium=bio
 Facebook      https://cara.dog/?utm_source=facebook&utm_medium=group
 Printed QR    already tagged: utm_source=qr&utm_medium=print
 ```
