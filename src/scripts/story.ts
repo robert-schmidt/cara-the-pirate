@@ -247,6 +247,29 @@ if (latest) {
     .catch(() => {}); // blog unreachable: the section simply stays hidden
 }
 
+/* ---------- analytics: which links and buttons actually get used ---------- */
+
+const track = (name: string, params: Record<string, string>) => {
+  (window as unknown as { gtag?: (...a: unknown[]) => void }).gtag?.('event', name, params);
+};
+document.addEventListener(
+  'click',
+  (e) => {
+    const el = (e.target as Element).closest('a, button');
+    if (!el) return;
+    const href = el.getAttribute('href') ?? '';
+    if (href.includes('buy.stripe.com')) track('donate_click', { method: 'card' });
+    else if (href.includes('paypal.me')) track('donate_click', { method: 'paypal' });
+    else if (el.matches('[data-copy]')) track('copy_details', { method: el.closest('.wallets') ? 'wallet' : 'bank' });
+    else if (el.matches('.share-btn')) track('share', { method: el.textContent?.trim() ?? 'link' });
+    else if (el.matches('[data-share]')) track('share', { method: 'native' });
+    else if (href.includes('x.com/carathepirate')) track('social_click', { method: 'x' });
+    else if (href.includes('tiktok.com/@cara')) track('social_click', { method: 'tiktok' });
+    else if (href.startsWith('/blog')) track('blog_click', { method: 'site' });
+  },
+  { capture: true },
+);
+
 /* ---------- copy, share, day counter ---------- */
 
 document.addEventListener('click', async (e) => {

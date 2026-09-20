@@ -2,6 +2,7 @@ User-agent: *
 Allow: /
 
 Sitemap: https://carathepirate.com/sitemap-index.xml
+Sitemap: https://carathepirate.com/blog/sitemap.xml
 
 # page template used by the blog service, not a page for readers
 Disallow: /blog-shell/

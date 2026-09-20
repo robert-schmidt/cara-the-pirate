@@ -22,6 +22,13 @@ const wallets = await Promise.all(
   })),
 );
 
+const shareUrl = encodeURIComponent('https://carathepirate.com/');
+const shareText = encodeURIComponent(
+  lang === 'ro'
+    ? 'Cara și-a pierdut un ochi pe stradă și și-a găsit o casă lângă București:'
+    : 'Cara lost an eye on the streets and found a home near Bucharest:',
+);
+
 const bankRows: [string, string, string][] = [
   [s.bank.holder, b.holder, b.holder],
   ['IBAN', b.iban.replace(/(.{4})/g, '$1 ').trim(), b.iban],
@@ -93,6 +100,11 @@ const bankRows: [string, string, string][] = [
       <h3>{s.share.title}</h3>
       <p>{s.share.p}</p>
       <button type="button" class="btn alt" data-share data-done={s.share.done} aria-live="polite">{s.share.btn}</button>
+      <p class="share-row centered">
+        <a class="share-btn" href={`https://api.whatsapp.com/send?text=${shareText}%20${shareUrl}`} target="_blank" rel="noopener">WhatsApp</a>
+        <a class="share-btn" href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noopener">Facebook</a>
+        <a class="share-btn" href={`https://x.com/intent/tweet?url=${shareUrl}&text=${shareText}`} target="_blank" rel="noopener">X</a>
+      </p>
       <p class="follow">
         {s.follow[0]} <a href={social.x}>X</a> {s.follow[1]} <a href={social.tiktok}>TikTok</a>.
       </p>

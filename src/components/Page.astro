@@ -23,6 +23,34 @@ const chapters = (await getCollection('chapters', (c) => c.id.startsWith(`${lang
   a.id.localeCompare(b.id),
 );
 const days = Math.floor((Date.now() - Date.parse(ARRIVED)) / 864e5) + 1;
+
+// Structured data: tells Google this is one story about a specific dog, written by real people.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'WebSite',
+      '@id': 'https://carathepirate.com/#website',
+      url: 'https://carathepirate.com/',
+      name: 'Cara the Pirate',
+      inLanguage: lang,
+      description: s.meta.description,
+    },
+    {
+      '@type': 'Article',
+      headline: 'Cara the Pirate',
+      description: s.meta.description,
+      image: 'https://carathepirate.com/og.jpg',
+      datePublished: ARRIVED,
+      dateModified: new Date().toISOString().slice(0, 10),
+      inLanguage: lang,
+      isPartOf: { '@id': 'https://carathepirate.com/#website' },
+      mainEntityOfPage: url.href,
+      author: { '@type': 'Person', name: 'Robert and Adelina' },
+      about: { '@type': 'Thing', name: 'Cara, a one-eyed rescue dog near Bucharest' },
+    },
+  ],
+};
 const gaId = (import.meta.env.PUBLIC_GA_ID as string | undefined)?.trim();
 // No analytics or ad cookies unless a visitor consents, so the site needs no cookie banner.
 // Google still reports traffic, it just can't identify anyone.
@@ -56,6 +84,7 @@ gtag('config', '${gaId}');`;
     <meta property="og:locale" content={s.meta.locale} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content={social.xHandle} />
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
     <script is:inline>document.documentElement.classList.add('js');</script>
     {
       gaId && (
