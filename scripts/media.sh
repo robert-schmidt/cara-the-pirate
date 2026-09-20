@@ -32,5 +32,12 @@ portrait "cookie Large.jpeg"             560:560:320:220 cookie
 portrait "oreo Large.jpeg"               380:380:210:660 oreo
 portrait "cats Large.jpeg"               500:500:60:440  cats
 
+# Homepage TikTok preview, made from the finished vertical cut (node tiktok/make.mjs first).
+if [ -f tiktok/out/cara-tiktok.mp4 ]; then
+  ffmpeg -v error -y -i tiktok/out/cara-tiktok.mp4 -vf "scale=540:960" -c:v libx264 -preset slow -crf 30 \
+    -pix_fmt yuv420p -movflags +faststart -an public/video/tiktok-preview.mp4
+  ffmpeg -v error -y -ss 0.2 -i public/video/tiktok-preview.mp4 -frames:v 1 -q:v 4 public/video/tiktok-preview.jpg
+fi
+
 # Share image (1200x630) cropped from the full-res original.
 ffmpeg -v error -y -i media/cara-happy-1.JPG -vf "scale=1200:-2,crop=1200:630:0:ih*0.30" -q:v 3 public/og.jpg

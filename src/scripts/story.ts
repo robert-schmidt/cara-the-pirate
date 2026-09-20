@@ -218,6 +218,35 @@ if (motion) {
   videos.filter((v) => !v.classList.contains('ambient')).forEach((v) => (v.controls = true));
 }
 
+/* ---------- latest blog posts, fetched from the blog service ---------- */
+
+const latest = document.querySelector<HTMLElement>('[data-latest]');
+if (latest) {
+  fetch('/blog/api/recent')
+    .then((r) => (r.ok ? r.json() : []))
+    .then((posts: { slug: string; title: string; lang: string; dateText: string; image: string; excerpt: string }[]) => {
+      if (!Array.isArray(posts) || posts.length === 0) return;
+      const lang = latest.dataset.lang ?? 'en';
+      const mine = posts.filter((p) => p.lang === lang);
+      const list = $('.latest-list', latest);
+      for (const p of (mine.length ? mine : posts).slice(0, 3)) {
+        const li = document.createElement('li');
+        li.className = p.image ? 'latest-card' : 'latest-card no-image';
+        li.innerHTML = `${p.image ? '<img alt="" loading="lazy">' : ''}<div><p class="date"></p><h3><a></a></h3><p class="excerpt"></p></div>`;
+        if (p.image) li.querySelector('img')!.src = p.image;
+        li.querySelector('.date')!.textContent = p.dateText;
+        const link = li.querySelector('a')!;
+        link.href = `/blog/${p.slug}`;
+        link.textContent = p.title;
+        li.querySelector('.excerpt')!.textContent = p.excerpt;
+        list.append(li);
+      }
+      latest.hidden = false;
+      ScrollTrigger.refresh(); // the page got taller, so the paw trail needs remeasuring
+    })
+    .catch(() => {}); // blog unreachable: the section simply stays hidden
+}
+
 /* ---------- copy, share, day counter ---------- */
 
 document.addEventListener('click', async (e) => {

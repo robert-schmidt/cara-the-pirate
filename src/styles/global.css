@@ -443,29 +443,89 @@ html.js .x-mark:not(.found) path { stroke-dashoffset: 1; }
 
 .blog-wrap { padding-block: 8rem 5rem; min-height: 70svh; }
 .blog-wrap h1 { font-size: clamp(2.5rem, 1.6rem + 3vw, 4rem); letter-spacing: -0.03em; margin: 0 0 2.5rem; }
-.post-list { display: grid; gap: 2.5rem; max-width: 46rem; margin: 0; padding: 0; list-style: none; }
-.post-card { display: grid; grid-template-columns: 9rem minmax(0, 1fr); gap: 1.5rem; align-items: start; }
-.post-card .thumb img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; }
-.post-card h2 { margin: 0.2rem 0 0.5rem; font-size: 1.6rem; }
+
+.post-list { display: grid; gap: 1.5rem; margin: 0; padding: 0; list-style: none; }
+.post-card {
+  position: relative;
+  display: grid;
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: center;
+  padding: clamp(1rem, 2.5vw, 1.75rem);
+  border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--bg) 55%, #fff);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.post-card.has-cover { grid-template-columns: minmax(0, 19rem) minmax(0, 1fr); }
+.post-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--mark) 45%, transparent); box-shadow: 0 16px 34px -20px rgb(28 43 54 / 0.5); }
+.post-card .thumb img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; }
+.post-card h2 { margin: 0.3rem 0 0.6rem; font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); }
 .post-card h2 a { text-decoration: none; }
-.post-card h2 a:hover { color: var(--mark); }
-.post-card p { margin: 0; }
-.post-card.is-draft { opacity: 0.55; }
+.post-card h2 a::after { content: ''; position: absolute; inset: 0; border-radius: 12px; } /* the whole card is the link */
+.post-card .excerpt { margin: 0; max-width: 62ch; }
+.post-card .more { margin: 0.9rem 0 0; font-family: var(--hand); font-size: 1.05rem; color: var(--mark); }
+.post-card.is-draft { opacity: 0.6; }
 .post-card .date, .post .date { margin: 0; font-family: var(--hand); font-size: 1.05rem; color: var(--date); }
 
-.post { max-width: 38rem; }
+.post { max-width: 40rem; }
 .post h1 { margin: 0.3rem 0 1.5rem; }
-.post .cover { width: 100%; margin-bottom: 2rem; border-radius: 6px; }
+.post .cover { width: 100%; margin-bottom: 2rem; border-radius: 8px; }
 .post p { margin: 0 0 1.1em; }
-.post img { width: 100%; margin: 1.6rem 0; border-radius: 6px; }
+.post img { width: 100%; margin: 1.6rem 0; border-radius: 8px; }
 .post h2 { margin: 2.2rem 0 0.8rem; font-size: 1.8rem; }
 .post h3 { margin: 1.8rem 0 0.7rem; font-size: 1.35rem; }
 .post blockquote { margin: 1.6rem 0; padding-left: 1.2rem; border-left: 3px solid var(--mark); font-style: italic; }
 .post ul { padding-left: 1.2rem; }
-.post .back { margin-top: 3rem; font-family: var(--hand); }
+.post .back { margin-top: 2.5rem; font-family: var(--hand); }
+
+.share-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem;
+  margin-top: 3rem; padding-top: 1.5rem;
+  border-top: 1px solid color-mix(in srgb, var(--fg) 15%, transparent);
+}
+.share-label { margin-right: 0.3rem; font-family: var(--hand); font-size: 1.05rem; color: var(--date); }
+.share-btn {
+  display: inline-flex; align-items: center; min-height: 2.6rem; padding: 0.35rem 1.1rem;
+  border: 1.5px solid color-mix(in srgb, var(--fg) 28%, transparent); border-radius: 999px;
+  background: none; color: inherit; font: 600 0.9rem/1 var(--serif); text-decoration: none; cursor: pointer;
+}
+.share-btn:hover { border-color: var(--mark); color: var(--mark); }
+
+/* ---------- homepage: keep up with Cara (TikTok + latest posts) ---------- */
+
+.keepup { padding-block: clamp(4rem, 10vh, 7rem); }
+.keepup .wrap { display: grid; grid-template-columns: minmax(0, 20rem) minmax(0, 1fr); gap: clamp(2rem, 6vw, 5rem); align-items: start; }
+.keepup h2 { font-size: clamp(1.9rem, 1.4rem + 1.6vw, 2.6rem); margin-bottom: 1rem; }
+.keepup .lede { margin: 0 0 1.5rem; font-style: italic; }
+.tok-video { position: relative; }
+.tok-video video { display: block; width: 100%; height: auto; border-radius: 12px; background: var(--shallow); box-shadow: 0 18px 40px -22px rgb(28 43 54 / 0.55); }
+.tok-links { display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.2rem; }
+
+.latest-list { display: grid; gap: 1rem; margin: 0; padding: 0; list-style: none; }
+.latest-card {
+  position: relative; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 1.2rem; align-items: center;
+  padding: 1rem; border: 1px solid color-mix(in srgb, var(--fg) 14%, transparent); border-radius: 10px;
+  transition: border-color 0.18s ease, transform 0.18s ease;
+}
+.latest-card.no-image { grid-template-columns: minmax(0, 1fr); }
+.latest-card:hover { transform: translateY(-2px); border-color: color-mix(in srgb, var(--mark) 45%, transparent); }
+.latest-card img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; }
+.latest-card h3 { margin: 0.15rem 0 0.3rem; font-size: 1.25rem; }
+.latest-card h3 a { text-decoration: none; }
+.latest-card h3 a::after { content: ''; position: absolute; inset: 0; border-radius: 10px; }
+.latest-card p { margin: 0; font-size: 0.95rem; }
+.latest-card .date { font-family: var(--hand); font-size: 0.95rem; color: var(--date); }
+.keepup .all-posts { margin-top: 1.5rem; font-family: var(--hand); font-size: 1.05rem; }
+
+@media (max-width: 899px) {
+  .keepup .wrap { grid-template-columns: 1fr; }
+  .tok-video { max-width: 20rem; }
+}
+@media (max-width: 720px) {
+  .post-card.has-cover { grid-template-columns: 1fr; }
+  .post-card .thumb img { aspect-ratio: 16 / 9; }
+}
 
 @media (max-width: 599px) {
   .bar .social { display: none; } /* the footer still links them; the header needs the room */
-  .post-card { grid-template-columns: 1fr; }
-  .post-card .thumb img { aspect-ratio: 16 / 10; }
 }
