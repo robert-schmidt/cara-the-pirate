@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.astro/
+.env
+.DS_Store
+# raw originals (~130 MB); `npm run media` turns them into src/assets/photos + public/video
+media/
+
+# TikTok renders
+tiktok/out/
+
+# server details and the runbook: never in a public repo
+.deploy.env
+DEPLOY.local.md
+
+# Internal design notes. Kept out of the public repo because they describe how the story copy
+# was written to land emotionally — fine internally, easy to quote out of context publicly.
+# Delete this line if you'd rather publish it.
+PLAN.md

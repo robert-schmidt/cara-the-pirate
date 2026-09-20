@@ -1,0 +1,17 @@
+---
+import { t, type Lang } from '../i18n';
+import { social } from '../site';
+
+const { lang } = Astro.props as { lang: Lang };
+const s = t[lang];
+---
+
+<footer class="foot">
+  <div class="wrap">
+    <p>{s.footer}</p>
+    <p>
+      <a href={social.x}>X</a>
+      <a href={social.tiktok}>TikTok</a>
+    </p>
+  </div>
+</footer>

@@ -1,0 +1,63 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import { photos, videoSize } from '../site';
+
+interface Props {
+  entry: CollectionEntry<'chapters'>;
+  index: number;
+}
+const { entry, index } = Astro.props;
+const { Content } = await render(entry);
+const { date, title, mood, media } = entry.data;
+const id = `chapter-${index + 1}`;
+const isWide = (m: (typeof media)[number]) => {
+  const [w, h] = m.photo ? [photos[m.photo].width, photos[m.photo].height] : (videoSize[m.video!] ?? [0, 1]);
+  return w > h;
+};
+---
+
+<section class="chapter" data-mood={mood} data-trail={index % 2 ? 'right' : 'left'} aria-labelledby={id}>
+  <div class="wrap">
+    <div class="text">
+      <p class="date" data-node>{date}</p>
+      <h2 id={id}>{title}</h2>
+      <div class="body"><Content /></div>
+    </div>
+    <div class={`media n${media.length}`}>
+      {
+        media.map((m) => (
+          <figure class:list={['shot', { wide: isWide(m) }]}>
+            <div class="frame">
+              {m.photo ? (
+                <Picture
+                  src={photos[m.photo]}
+                  alt={m.alt}
+                  widths={[480, 720, 960, 1280]}
+                  sizes="(min-width: 900px) 40vw, 92vw"
+                  formats={['avif', 'webp']}
+                />
+              ) : (
+                <video
+                  data-autoplay
+                  muted
+                  loop
+                  playsinline
+                  preload="none"
+                  poster={`/video/${m.video}.jpg`}
+                  width={videoSize[m.video!]?.[0]}
+                  height={videoSize[m.video!]?.[1]}
+                  aria-label={m.alt}
+                >
+                  <source src={`/video/${m.video}.mp4`} type="video/mp4" />
+                </video>
+              )}
+            </div>
+            {m.caption && <figcaption>{m.caption}</figcaption>}
+          </figure>
+        ))
+      }
+    </div>
+  </div>
+</section>

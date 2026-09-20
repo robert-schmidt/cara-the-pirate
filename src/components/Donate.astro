@@ -1,0 +1,101 @@
+---
+import QRCode from 'qrcode';
+import { pay, social } from '../site';
+import { t, type Lang } from '../i18n';
+
+const { lang } = Astro.props as { lang: Lang };
+const s = t[lang].donate;
+const b = pay.bank;
+
+// QR codes are rendered here at build time, so the visitor's browser runs no QR code.
+const wallets = await Promise.all(
+  pay.wallets.map(async (w) => ({
+    ...w,
+    name: s.wallets[w.id].name,
+    note: s.wallets[w.id].note(w.networks),
+    qr: await QRCode.toString(`${w.scheme}:${w.address}`, {
+      type: 'svg',
+      margin: 0,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#1c2b36', light: '#ffffff' },
+    }),
+  })),
+);
+
+const bankRows: [string, string, string][] = [
+  [s.bank.holder, b.holder, b.holder],
+  ['IBAN', b.iban.replace(/(.{4})/g, '$1 ').trim(), b.iban],
+  [s.bank.bank, b.bank, b.bank],
+  ['BIC / SWIFT', b.bic, b.bic],
+  [s.bank.currency, b.currency, b.currency],
+  [s.bank.reference, s.bank.referenceValue, s.bank.referenceValue],
+];
+---
+
+<section class="donate" id="donate" data-mood="dawn" aria-labelledby="donate-h">
+  <div class="wrap">
+    <svg class="x-mark" viewBox="0 0 120 120" aria-hidden="true">
+      <path d="M24 20 Q58 62 98 100" pathLength="1"></path>
+      <path d="M97 22 Q60 56 22 99" pathLength="1"></path>
+    </svg>
+    <h2 id="donate-h">{s.title}</h2>
+    <p class="lede">{s.lede}</p>
+
+    <div class="quick">
+      {pay.stripe && <a class="btn" href={pay.stripe}>{s.card}</a>}
+      {pay.paypal && <a class="btn alt" href={pay.paypal}>{s.paypal}</a>}
+    </div>
+    {pay.stripe && <p class="note center">{s.cardNote}</p>}
+
+    <div class="ways">
+      <div class="way">
+        <h3>{s.bank.title}</h3>
+        <dl class="bank">
+          {
+            bankRows.map(([label, shown, copy]) => (
+              <div>
+                <dt>{label}</dt>
+                <dd>
+                  <span>{shown}</span>
+                  <button type="button" class="copy" data-copy={copy} data-done={s.copied} aria-live="polite">
+                    {s.copy}
+                  </button>
+                </dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+
+      <div class="way">
+        <h3>{s.crypto}</h3>
+        <ul class="wallets">
+          {
+            wallets.map((w) => (
+              <li>
+                <div class="qr" role="img" aria-label={s.qrAlt(w.name)} set:html={w.qr} />
+                <div>
+                  <h4>{w.name}</h4>
+                  <p class="note">{w.note}</p>
+                  <code>{w.address}</code>
+                  <button type="button" class="copy" data-copy={w.address} data-done={s.copied} aria-live="polite">
+                    {s.copy}
+                  </button>
+                </div>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+
+    <div class="share">
+      <h3>{s.share.title}</h3>
+      <p>{s.share.p}</p>
+      <button type="button" class="btn alt" data-share data-done={s.share.done} aria-live="polite">{s.share.btn}</button>
+      <p class="follow">
+        {s.follow[0]} <a href={social.x}>X</a> {s.follow[1]} <a href={social.tiktok}>TikTok</a>.
+      </p>
+    </div>
+  </div>
+</section>
