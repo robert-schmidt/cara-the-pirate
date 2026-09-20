@@ -7,6 +7,8 @@ export const social = {
   xHandle: '@carathepirate',
   tiktok: 'https://www.tiktok.com/@cara.the.pirate',
   tiktokHandle: '@cara.the.pirate',
+  instagram: 'https://www.instagram.com/carathepirate',
+  instagramHandle: '@carathepirate',
 };
 
 // Payment details come from env vars at build time (see .env.example).
