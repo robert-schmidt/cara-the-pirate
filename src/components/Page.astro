@@ -1,0 +1,210 @@
+---
+import '@fontsource-variable/literata/opsz.css';
+import '@fontsource-variable/literata/opsz-italic.css';
+import '@fontsource-variable/shantell-sans/full.css';
+import '../styles/global.css';
+import { getCollection } from 'astro:content';
+import { Picture } from 'astro:assets';
+import Chapter from './Chapter.astro';
+import Donate from './Donate.astro';
+import SiteHeader from './SiteHeader.astro';
+import SiteFooter from './SiteFooter.astro';
+import { t, type Lang } from '../i18n';
+import { ARRIVED, crew, photos, social } from '../site';
+
+const { lang } = Astro.props as { lang: Lang };
+const s = t[lang];
+const home = lang === 'en' ? '/' : '/ro/';
+const otherHome = lang === 'en' ? '/ro/' : '/';
+const url = new URL(home, Astro.site);
+const title = 'Cara the Pirate';
+
+const chapters = (await getCollection('chapters', (c) => c.id.startsWith(`${lang}/`))).sort((a, b) =>
+  a.id.localeCompare(b.id),
+);
+const days = Math.floor((Date.now() - Date.parse(ARRIVED)) / 864e5) + 1;
+const gaId = (import.meta.env.PUBLIC_GA_ID as string | undefined)?.trim();
+// No analytics or ad cookies unless a visitor consents, so the site needs no cookie banner.
+// Google still reports traffic, it just can't identify anyone.
+const gaSnippet = `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+gtag('js', new Date());
+gtag('config', '${gaId}');`;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={s.meta.description} />
+    <link rel="canonical" href={url} />
+    <link rel="alternate" hreflang="en" href={new URL('/', Astro.site)} />
+    <link rel="alternate" hreflang="ro" href={new URL('/ro/', Astro.site)} />
+    <link rel="alternate" hreflang="x-default" href={new URL('/', Astro.site)} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta name="theme-color" content="#edf2f1" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={s.meta.description} />
+    <meta property="og:url" content={url} />
+    <meta property="og:image" content={new URL('/og.jpg', Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={s.meta.locale} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content={social.xHandle} />
+    <script is:inline>document.documentElement.classList.add('js');</script>
+    {
+      gaId && (
+        <Fragment>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+          <script is:inline set:html={gaSnippet} />
+        </Fragment>
+      )
+    }
+  </head>
+  <body>
+    <SiteHeader lang={lang} />
+
+    <main>
+      <svg class="trail" aria-hidden="true">
+        <defs>
+          <symbol id="paw" viewBox="-8 -8 16 16">
+            <ellipse cx="0" cy="2.8" rx="3.7" ry="3.2"></ellipse>
+            <ellipse cx="-4.5" cy="-1.4" rx="1.5" ry="2" transform="rotate(-25 -4.5 -1.4)"></ellipse>
+            <ellipse cx="-1.6" cy="-4.4" rx="1.5" ry="2"></ellipse>
+            <ellipse cx="1.6" cy="-4.4" rx="1.5" ry="2"></ellipse>
+            <ellipse cx="4.5" cy="-1.4" rx="1.5" ry="2" transform="rotate(25 4.5 -1.4)"></ellipse>
+          </symbol>
+        </defs>
+        <path class="route"></path>
+        <g class="nodes"></g>
+        <g class="prints"></g>
+      </svg>
+
+      <section class="hero" data-mood="dawn">
+        <div class="wrap">
+          <div class="hero-text">
+            <h1>Cara<br />the Pirate</h1>
+            <p class="sub">{s.hero.sub}</p>
+            <p class="cue">
+              {s.hero.cue}
+              <svg viewBox="0 0 24 32" width="18" height="24" aria-hidden="true">
+                <path d="M12 2 C 6 10, 18 16, 12 28 M5 21 L12 29 L19 21" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+            </p>
+          </div>
+          <figure class="hero-photo">
+            <div class="frame">
+              <Picture
+                src={photos['cara-happy-1']}
+                alt={s.hero.alt}
+                widths={[480, 720, 960]}
+                sizes="(min-width: 900px) 40vw, 92vw"
+                formats={['avif', 'webp']}
+                loading="eager"
+                fetchpriority="high"
+              />
+            </div>
+            <p class="note" aria-hidden="true">{s.hero.note}</p>
+            <!-- arrow from the note to her wink, drawn in the photo's own % coordinates -->
+            <svg class="note-arrow" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M84 -3 C 87 9, 82 22, 72.5 32.5 M69 29.5 L72 33.2 L76.5 31" />
+            </svg>
+          </figure>
+        </div>
+      </section>
+
+      {chapters.map((entry, i) => <Chapter entry={entry} index={i} />)}
+
+      <section class="punch" data-mood="dusk" aria-label={s.punch.quote}>
+        <div class="punch-inner">
+          <svg class="eyes" viewBox="0 0 240 90" aria-hidden="true">
+            <g class="eye-open">
+              <path d="M18 45 Q62 4 106 45 Q62 86 18 45 Z" fill="#edf2f1"></path>
+              <circle class="iris" cx="62" cy="45" r="19" fill="#c47a3a"></circle>
+              <circle class="pupil" cx="62" cy="45" r="8.5" fill="#1c2b36"></circle>
+              <circle cx="67" cy="39" r="3" fill="#edf2f1"></circle>
+            </g>
+            <path class="eye-closed" d="M136 40 Q180 72 224 40" fill="none" stroke="#edf2f1" stroke-width="7" stroke-linecap="round"></path>
+          </svg>
+          <p class="l1">{s.punch.l1}</p>
+          <p class="l2">{s.punch.l2}</p>
+          <blockquote>
+            <p>{s.punch.quotes[0]}{s.punch.quote}{s.punch.quotes[1]}</p>
+            <footer class="sig">— {s.punch.sig}</footer>
+          </blockquote>
+          <p class="days">{s.punch.dayBefore}<span data-since={ARRIVED}>{days}</span>{s.punch.dayAfter}</p>
+        </div>
+      </section>
+
+      <section class="crew" data-mood="dawn" data-trail="left" aria-labelledby="crew-h">
+        <div class="wrap">
+          <div class="legend">
+            <h2 id="crew-h" data-node>{s.crew.title}</h2>
+            <p class="lede">{s.crew.intro}</p>
+            <ul>
+              {
+                crew.map((c) => {
+                  const m = s.crew.members[c.id];
+                  return (
+                    <li>
+                      <span class="portrait">
+                        {c.photo ? (
+                          <Picture src={photos[c.photo]} alt="" widths={[260, 520]} sizes="7rem" formats={['avif', 'webp']} />
+                        ) : (
+                          <svg viewBox="-8 -8 16 16" width="34" height="34" role="img" aria-label={s.crew.photoSoon}>
+                            <use href="#paw" x="-8" y="-8" width="16" height="16"></use>
+                          </svg>
+                        )}
+                      </span>
+                      <div>
+                        <h3>
+                          {m.name ?? c.name}
+                          {m.alias && <small>({m.alias})</small>}
+                        </h3>
+                        <p class="rank">{m.rank}</p>
+                        <p>{m.line}</p>
+                      </div>
+                    </li>
+                  );
+                })
+              }
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="family" data-mood="dusk" aria-labelledby="family-h">
+        <video class="ambient" data-autoplay muted loop playsinline preload="none" poster="/video/garden.jpg" aria-hidden="true">
+          <source src="/video/garden.mp4" type="video/mp4" />
+        </video>
+        <div class="wrap">
+          <div>
+            <h2 id="family-h">{s.family.title}</h2>
+            <p>{s.family.p1}</p>
+            <p>{s.family.p2}</p>
+          </div>
+          <div>
+            <h2>{s.why.title}</h2>
+            <p>{s.why.p}</p>
+            <p class="crewcall">{s.why.crew}</p>
+            <h3>{s.why.coversTitle}</h3>
+            <ul class="covers">{s.why.covers.map((c) => <li>{c}</li>)}</ul>
+          </div>
+        </div>
+      </section>
+
+      <Donate lang={lang} />
+    </main>
+
+    <SiteFooter lang={lang} />
+
+    <script>
+      import '../scripts/story';
+    </script>
+  </body>
+</html>

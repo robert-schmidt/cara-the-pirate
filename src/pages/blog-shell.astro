@@ -1,0 +1,44 @@
+---
+import '@fontsource-variable/literata/opsz.css';
+import '@fontsource-variable/literata/opsz-italic.css';
+import '@fontsource-variable/shantell-sans/full.css';
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+
+// Not a real page: the blog service (blog/server.mjs) reads this file and swaps the three
+// markers for the post's title, meta tags and HTML. Keeping it here means the blog always
+// wears the same header, footer, fonts and styles as the rest of the site.
+const gaId = (import.meta.env.PUBLIC_GA_ID as string | undefined)?.trim();
+const gaSnippet = `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'denied' });
+gtag('js', new Date());
+gtag('config', '${gaId}');`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><!--TITLE--></title>
+    <!--META-->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="alternate" type="application/rss+xml" title="Cara the Pirate" href="/blog/feed.xml" />
+    <meta name="theme-color" content="#edf2f1" />
+    {
+      gaId && (
+        <Fragment>
+          <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`} />
+          <script is:inline set:html={gaSnippet} />
+        </Fragment>
+      )
+    }
+  </head>
+  <body>
+    <SiteHeader lang="en" />
+    <main><!--CONTENT--></main>
+    <SiteFooter lang="en" />
+  </body>
+</html>

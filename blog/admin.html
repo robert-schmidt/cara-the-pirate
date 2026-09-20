@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Write · Cara the Pirate</title>
+<style>
+  :root { --paper:#edf2f1; --ink:#1c2b36; --mark:#b52a6c; --line:#ccd8d8; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--paper); color:var(--ink);
+    font:16px/1.5 ui-serif, Georgia, serif; }
+  header { display:flex; align-items:center; justify-content:space-between; gap:1rem;
+    padding:.9rem 1.2rem; border-bottom:1px solid var(--line); background:#fff; position:sticky; top:0; }
+  header strong { font-size:1.05rem; }
+  main { max-width:56rem; margin:0 auto; padding:1.5rem 1.2rem 5rem; }
+  button, .btn { font:600 .95rem/1 ui-sans-serif, system-ui, sans-serif; padding:.7rem 1.2rem; border-radius:999px;
+    border:2px solid var(--mark); background:var(--mark); color:#fff; cursor:pointer; text-decoration:none; display:inline-block; }
+  button.ghost, .btn.ghost { background:transparent; color:var(--ink); border-color:var(--ink); }
+  button.danger { background:transparent; color:#9c2626; border-color:#9c2626; }
+  button:disabled { opacity:.5; cursor:default; }
+  label { display:block; font:600 .8rem/1.4 ui-sans-serif, system-ui, sans-serif; text-transform:none; margin:1rem 0 .3rem; }
+  input[type=text], input[type=date], select, textarea { width:100%; padding:.7rem .8rem; border:1px solid var(--line);
+    border-radius:8px; background:#fff; color:inherit; font:inherit; }
+  textarea { min-height:22rem; line-height:1.6; resize:vertical; }
+  .row { display:flex; gap:1rem; flex-wrap:wrap; }
+  .row > * { flex:1 1 12rem; }
+  .bar { display:flex; gap:.6rem; align-items:center; flex-wrap:wrap; margin-top:1.4rem; }
+  .spacer { flex:1; }
+  ul { list-style:none; margin:0; padding:0; }
+  li.post { display:flex; align-items:center; gap:1rem; padding:.9rem; border:1px solid var(--line);
+    border-radius:10px; background:#fff; margin-bottom:.6rem; cursor:pointer; }
+  li.post img { width:56px; height:56px; object-fit:cover; border-radius:8px; flex:none; }
+  li.post h3 { margin:0; font-size:1.05rem; }
+  li.post p { margin:.15rem 0 0; font-size:.85rem; opacity:.7; }
+  .tag { font:600 .7rem/1 ui-sans-serif, system-ui, sans-serif; padding:.3rem .5rem; border-radius:999px;
+    background:#e5d6b8; color:#6b4a12; }
+  .note { font-size:.85rem; opacity:.75; }
+  .cover-preview { max-width:14rem; border-radius:8px; display:block; margin-top:.5rem; }
+  .login { max-width:22rem; margin:18vh auto; text-align:center; }
+  .err { color:#9c2626; font-size:.9rem; min-height:1.2em; }
+  .hide { display:none !important; }
+</style>
+</head>
+<body>
+
+<div id="login" class="login hide">
+  <h1>Write a post</h1>
+  <label for="pw">Password</label>
+  <input id="pw" type="password" autocomplete="current-password">
+  <p class="err" id="loginErr"></p>
+  <button id="loginBtn">Log in</button>
+</div>
+
+<div id="app" class="hide">
+  <header>
+    <strong>Cara the Pirate · blog</strong>
+    <span>
+      <a class="btn ghost" href="/blog" target="_blank" rel="noopener">View blog</a>
+      <button id="newBtn">New post</button>
+    </span>
+  </header>
+
+  <main>
+    <section id="listView">
+      <ul id="list"></ul>
+      <p class="note" id="empty"></p>
+    </section>
+
+    <section id="editView" class="hide">
+      <label for="title">Title</label>
+      <input id="title" type="text" placeholder="What happened?">
+
+      <div class="row">
+        <div>
+          <label for="date">Date</label>
+          <input id="date" type="date">
+        </div>
+        <div>
+          <label for="lang">Language</label>
+          <select id="lang"><option value="en">English</option><option value="ro">Română</option></select>
+        </div>
+        <div>
+          <label for="draft">Status</label>
+          <select id="draft"><option value="false">Published</option><option value="true">Draft</option></select>
+        </div>
+      </div>
+
+      <label>Cover photo <span class="note">— shown on the blog list and when the post is shared</span></label>
+      <input id="coverFile" type="file" accept="image/*">
+      <img id="coverPreview" class="cover-preview hide" alt="">
+
+      <label for="body">Story <span class="note">— blank line between paragraphs. **bold**, *italic*, ## heading, - list</span></label>
+      <textarea id="body" placeholder="Write it like you'd tell it…"></textarea>
+
+      <div class="bar">
+        <input id="photoFile" type="file" accept="image/*" class="hide">
+        <button class="ghost" id="photoBtn">Add photo to story</button>
+        <span class="note" id="status"></span>
+        <span class="spacer"></span>
+        <button class="danger" id="deleteBtn">Delete</button>
+        <button class="ghost" id="cancelBtn">Back</button>
+        <button id="saveBtn">Save</button>
+      </div>
+      <p class="err" id="editErr"></p>
+    </section>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const api = async (path, opts = {}) => {
+  const r = await fetch(path, { headers: { 'content-type': 'application/json' }, ...opts });
+  if (r.status === 401) { show('login'); throw new Error('Please log in again'); }
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || 'Something went wrong');
+  return data;
+};
+const show = (which) => {
+  $('login').classList.toggle('hide', which !== 'login');
+  $('app').classList.toggle('hide', which === 'login');
+  $('listView').classList.toggle('hide', which !== 'list');
+  $('editView').classList.toggle('hide', which !== 'edit');
+};
+
+/* ---------- login ---------- */
+$('loginBtn').onclick = async () => {
+  $('loginErr').textContent = '';
+  try {
+    await api('/blog/api/login', { method: 'POST', body: JSON.stringify({ password: $('pw').value }) });
+    $('pw').value = '';
+    await loadList();
+  } catch (e) { $('loginErr').textContent = e.message; }
+};
+$('pw').onkeydown = (e) => { if (e.key === 'Enter') $('loginBtn').click(); };
+
+/* ---------- list ---------- */
+async function loadList() {
+  const posts = await api('/blog/api/posts');
+  $('list').innerHTML = '';
+  $('empty').textContent = posts.length ? '' : 'Nothing written yet. Hit “New post”.';
+  for (const p of posts) {
+    const li = document.createElement('li');
+    li.className = 'post';
+    li.innerHTML =
+      (p.cover ? `<img src="${p.cover}" alt="">` : '') +
+      `<div style="flex:1"><h3></h3><p></p></div>` +
+      (p.draft ? '<span class="tag">draft</span>' : '');
+    li.querySelector('h3').textContent = p.title;
+    li.querySelector('p').textContent = new Date(p.date).toLocaleDateString();
+    li.onclick = () => edit(p);
+    $('list').append(li);
+  }
+  show('list');
+}
+
+/* ---------- editing ---------- */
+let current = null;
+function edit(post) {
+  current = post;
+  $('title').value = post.title === 'Untitled' ? '' : post.title;
+  $('date').value = new Date(post.date).toISOString().slice(0, 10);
+  $('lang').value = post.lang || 'en';
+  $('draft').value = String(Boolean(post.draft));
+  $('body').value = post.body || '';
+  setCover(post.cover || '');
+  $('deleteBtn').classList.toggle('hide', !post.slug);
+  $('editErr').textContent = '';
+  $('status').textContent = '';
+  show('edit');
+  $('title').focus();
+}
+function setCover(url) {
+  current.cover = url;
+  $('coverPreview').src = url;
+  $('coverPreview').classList.toggle('hide', !url);
+}
+$('newBtn').onclick = () => edit({ title: '', date: new Date().toISOString(), lang: 'en', draft: false, cover: '', body: '' });
+$('cancelBtn').onclick = loadList;
+
+$('saveBtn').onclick = async () => {
+  $('editErr').textContent = '';
+  if (!$('title').value.trim()) { $('editErr').textContent = 'Give it a title first.'; return; }
+  $('saveBtn').disabled = true;
+  try {
+    const saved = await api('/blog/api/posts', {
+      method: 'POST',
+      body: JSON.stringify({
+        slug: current.slug,
+        title: $('title').value.trim(),
+        date: new Date($('date').value || Date.now()).toISOString(),
+        lang: $('lang').value,
+        draft: $('draft').value === 'true',
+        cover: current.cover || '',
+        body: $('body').value,
+      }),
+    });
+    current = saved;
+    await loadList();
+  } catch (e) { $('editErr').textContent = e.message; }
+  $('saveBtn').disabled = false;
+};
+
+$('deleteBtn').onclick = async () => {
+  if (!current.slug || !confirm(`Delete “${current.title}”? This cannot be undone.`)) return;
+  try { await api(`/blog/api/posts/${current.slug}`, { method: 'DELETE' }); await loadList(); }
+  catch (e) { $('editErr').textContent = e.message; }
+};
+
+/* ---------- photos: resized in the browser, so uploads stay small ---------- */
+function resize(file, max = 1600) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.width * scale);
+      c.height = Math.round(img.height * scale);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      resolve(c.toDataURL('image/jpeg', 0.82));
+    };
+    img.onerror = () => reject(new Error("That file isn't an image I can read."));
+    img.src = URL.createObjectURL(file);
+  });
+}
+async function upload(file) {
+  $('status').textContent = 'Uploading photo…';
+  const data = await resize(file);
+  const { url } = await api('/blog/api/upload', { method: 'POST', body: JSON.stringify({ name: file.name, data }) });
+  $('status').textContent = 'Photo added.';
+  setTimeout(() => ($('status').textContent = ''), 2500);
+  return url;
+}
+$('coverFile').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try { setCover(await upload(file)); } catch (err) { $('editErr').textContent = err.message; }
+  e.target.value = '';
+};
+$('photoBtn').onclick = () => $('photoFile').click();
+$('photoFile').onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const url = await upload(file);
+    const ta = $('body');
+    const at = ta.selectionStart ?? ta.value.length;
+    const snippet = `\n\n![](${url})\n\n`;
+    ta.value = ta.value.slice(0, at) + snippet + ta.value.slice(at);
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = at + snippet.length;
+  } catch (err) { $('editErr').textContent = err.message; }
+  e.target.value = '';
+};
+
+/* ---------- start ---------- */
+loadList().catch(() => show('login'));
+</script>
+</body>
+</html>
