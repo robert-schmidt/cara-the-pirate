@@ -139,6 +139,74 @@ Povestea ei + cum poți ajuta 👇
 
 **Link in bio:** `https://cara.dog/?utm_source=instagram&utm_medium=bio`
 
+### Captions
+
+Instagram cuts the caption at roughly 125 characters, so the first line has to work alone. Put the
+hashtags in the first comment to keep the caption clean.
+
+**Pinned post — `cara-tiktok` (41s)**
+
+```
+Someone took her eye. This is what happened next. 🏴‍☠️
+
+In June, people found her on the street and called us — they'd seen our number on an old
+adoption ad for another dog we'd rescued. She arrived the next day, low and careful, not
+quite sure what hands were for. A week later she had surgery.
+
+Today she runs our backyard, chews everything in it, and sleeps in a pile with three dogs
+and five cats.
+
+She lost an eye to a person. She never stopped trusting people.
+
+Her whole story is in our bio 👇
+```
+
+**`short-day1`**
+
+```
+Day 1 vs day 93. Same dog. 🏴‍☠️
+
+She came in with her ears down, not sure what hands were for. Now she owns the place.
+
+Full story in bio.
+```
+
+**`short-nurse`**
+
+```
+Her nurse was a cat. 🐈
+
+While she healed from the surgery, he claimed the spot next to her on the deck and kept it
+for a week. Oreo covered the day shift.
+
+Story in bio.
+```
+
+**`short-chaos`**
+
+```
+She has one eye and zero alibis. 🛏️💥
+
+Somewhere in that grass is what used to be a pillow. We have never been happier to clean up
+a mess.
+
+Story in bio.
+```
+
+**Romanian**, when you want the local audience:
+
+```
+Ziua 1 vs ziua 93. Același câine. 🏴‍☠️
+
+A intrat încet, cu urechile lăsate, nesigură la ce sunt bune mâinile. Acum conduce curtea.
+
+Povestea ei, în bio.
+```
+
+**First comment:** `#rescuedog #dogsofinstagram #adoptdontshop #rescuestory #onedeyeddog #romania`
+
+Tag the vet clinic when a post mentions the surgery — their followers are exactly the right people.
+
 ### A feed on the website?
 
 Not worth it right now, for three reasons: Meta retired the simple Basic Display API, so a live feed
